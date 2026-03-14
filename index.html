@@ -341,7 +341,7 @@
             
             if (tokens.length === 0) {
                 displayEl.innerHTML = '<pre class="empty-state">Tokens will appear here after login</pre>';
-                decodedEl.innerHTML = '<pre class="empty-state">Decoded tokens will appear here</pre>';
+                decodedEl.querySelector('pre').innerHTML = 'Decoded tokens will appear here';
                 return;
             }
             
@@ -350,7 +350,7 @@
 ${token}
             `).join('\n\n');
             
-            decodedEl.innerHTML = accounts.map((account, index) => `
+            decodedEl.querySelector('pre').innerHTML = accounts.map((account, index) => `
 === Account ${index + 1}: ${account.email} ===
 ${JSON.stringify(account, null, 2)}
             `).join('\n\n');
