@@ -115,6 +115,35 @@
             color: #333;
         }
         
+        .decoded-section {
+            margin-top: 20px;
+        }
+        
+        .decoded-section h3 {
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .decoded-display {
+            background: #e8f5e9;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: calc(50vh - 80px);
+            overflow-y: auto;
+            border: 1px solid #4caf50;
+        }
+        
+        .decoded-display pre {
+            white-space: pre-wrap;
+            margin: 0;
+            color: #1b5e20;
+        }
+        
         /* Right Pane - Login */
         .right-pane {
             width: 25%;
@@ -199,6 +228,12 @@
         <h2>🔑 ID Tokens</h2>
         <div class="token-display" id="tokenDisplay">
             <pre class="empty-state">Tokens will appear here after login</pre>
+        </div>
+        <div class="decoded-section">
+            <h3>📜 Decoded Token (Pretty JSON)</h3>
+            <div class="decoded-display" id="decodedDisplay">
+                <pre class="empty-state">Decoded tokens will appear here</pre>
+            </div>
         </div>
     </div>
     
@@ -302,15 +337,22 @@
         // Render tokens
         function renderTokens() {
             const displayEl = document.getElementById('tokenDisplay');
+            const decodedEl = document.getElementById('decodedDisplay');
             
             if (tokens.length === 0) {
                 displayEl.innerHTML = '<pre class="empty-state">Tokens will appear here after login</pre>';
+                decodedEl.innerHTML = '<pre class="empty-state">Decoded tokens will appear here</pre>';
                 return;
             }
             
             displayEl.innerHTML = tokens.map((token, index) => `
 <!-- Account ${index + 1}: ${accounts[index].email} -->
 ${token}
+            `).join('\n\n');
+            
+            decodedEl.innerHTML = accounts.map((account, index) => `
+=== Account ${index + 1}: ${account.email} ===
+${JSON.stringify(account, null, 2)}
             `).join('\n\n');
         }
         
