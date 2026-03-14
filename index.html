@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login with Google - POC</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .pane {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Left Pane - Account List */
+        .left-pane {
+            width: 25%;
+            background: rgba(255, 255, 255, 0.95);
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+        }
+        
+        .left-pane h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .account-list {
+            list-style: none;
+        }
+        
+        .account-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .account-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .account-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+            object-fit: cover;
+            border: 2px solid #667eea;
+        }
+        
+        .account-email {
+            color: #333;
+            font-size: 14px;
+            word-break: break-all;
+        }
+        
+        .empty-state {
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        /* Middle Pane - Token Display */
+        .middle-pane {
+            width: 50%;
+            background: #fff;
+            overflow-y: auto;
+        }
+        
+        .middle-pane h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .token-display {
+            background: #f4f4f4;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            word-break: break-all;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+        
+        .token-display pre {
+            white-space: pre-wrap;
+            margin: 0;
+            color: #333;
+        }
+        
+        /* Right Pane - Login */
+        .right-pane {
+            width: 25%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-left: 1px solid #ddd;
+        }
+        
+        .right-pane h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+        
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            background: #fff;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .google-btn:hover {
+            background: #f8f9fa;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .google-btn img {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+        }
+        
+        .google-btn span {
+            color: #3c4043;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background: #fff3cd;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #856404;
+            max-width: 90%;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .instructions code {
+            background: #ffeeba;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <!-- Left Pane - Account List -->
+    <div class="left-pane">
+        <h2>📋 Accounts</h2>
+        <ul class="account-list" id="accountList">
+            <li class="empty-state">No accounts logged in yet</li>
+        </ul>
+    </div>
+    
+    <!-- Middle Pane - Token Display -->
+    <div class="middle-pane">
+        <h2>🔑 ID Tokens</h2>
+        <div class="token-display" id="tokenDisplay">
+            <pre class="empty-state">Tokens will appear here after login</pre>
+        </div>
+    </div>
+    
+    <!-- Right Pane - Login -->
+    <div class="right-pane">
+        <h2>🔐 Login</h2>
+        <div id="g_id_onload"
+             data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+             data-context="signin"
+             data-ux_mode="redirect"
+             data-callback="handleCredentialResponse"
+             data-auto_prompt="false">
+        </div>
+        
+        <div class="g_id_signin"
+             data-type="standard"
+             data-size="large"
+             data-theme="outline"
+             data-text="signin_with"
+             data-shape="rectangular"
+             data-logo_alignment="left"
+             data-width="200">
+        </div>
+        
+        <div class="instructions">
+            <h3>⚠️ Setup Required</h3>
+            <p>Replace <code>YOUR_GOOGLE_CLIENT_ID</code> with your Google OAuth Client ID.</p>
+            <p style="margin-top: 10px;">In Google Cloud Console:</p>
+            <ul style="margin-left: 20px; margin-top: 5px;">
+                <li>Create OAuth 2.0 Client ID</li>
+                <li>Add authorized JavaScript origins</li>
+                <li>Add authorized redirect URIs</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Store accounts and tokens
+        let accounts = [];
+        let tokens = [];
+        
+        // Handle the credential response from Google
+        function handleCredentialResponse(response) {
+            console.log('Encoded JWT ID token: ' + response.credential);
+            
+            // Decode the JWT token to get user info
+            const userInfo = parseJwt(response.credential);
+            
+            console.log('User info:', userInfo);
+            
+            // Add to accounts list
+            addAccount(userInfo, response.credential);
+        }
+        
+        // Parse JWT token
+        function parseJwt(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        }
+        
+        // Add account to the list
+        function addAccount(userInfo, token) {
+            // Check if account already exists
+            const existingIndex = accounts.findIndex(a => a.sub === userInfo.sub);
+            
+            if (existingIndex === -1) {
+                // Add new account
+                accounts.push(userInfo);
+                tokens.push(token);
+            } else {
+                // Update existing account
+                accounts[existingIndex] = userInfo;
+                tokens[existingIndex] = token;
+            }
+            
+            renderAccounts();
+            renderTokens();
+        }
+        
+        // Render accounts list
+        function renderAccounts() {
+            const listEl = document.getElementById('accountList');
+            
+            if (accounts.length === 0) {
+                listEl.innerHTML = '<li class="empty-state">No accounts logged in yet</li>';
+                return;
+            }
+            
+            listEl.innerHTML = accounts.map((account, index) => `
+                <li class="account-item">
+                    <img class="account-avatar" src="${account.picture}" alt="Avatar">
+                    <span class="account-email">${account.email}</span>
+                </li>
+            `).join('');
+        }
+        
+        // Render tokens
+        function renderTokens() {
+            const displayEl = document.getElementById('tokenDisplay');
+            
+            if (tokens.length === 0) {
+                displayEl.innerHTML = '<pre class="empty-state">Tokens will appear here after login</pre>';
+                return;
+            }
+            
+            displayEl.innerHTML = tokens.map((token, index) => `
+<!-- Account ${index + 1}: ${accounts[index].email} -->
+${token}
+            `).join('\n\n');
+        }
+        
+        // Check for credential in URL (after redirect)
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const credential = urlParams.get('credential');
+            
+            if (credential) {
+                handleCredentialResponse({ credential: credential });
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        };
+    </script>
+</body>
+</html>
